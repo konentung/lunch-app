@@ -4,7 +4,7 @@
   // 修改：請將 WEBHOOK_URL 換成你的 Google Apps Script Web App 或 Firebase REST URL
   // - Google Apps Script: GET 應回傳 JSON 陣列；POST body 為 { option: "牛肉麵" }
   // - Firebase RTDB:      使用 https://<db>.firebaseio.com/lunch.json 形式
-  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyEyHFVDn1sPFhS_Tavzuhyjno7NnlVquENdFqKMt8h-dx_UMpsmG9ArD-7d0IBcxBA/exec";
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyhcQAYribHTn7_NL8IL2dgmxoUfiLAPZGHkr8-kHDk6iFyya3MWFl8z-2InmQP3TaO/exec";
 
   const DEFAULT_OPTIONS = [
     "牛肉麵",
