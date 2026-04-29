@@ -1,6 +1,11 @@
 (() => {
   "use strict";
 
+  // 修改：請將 WEBHOOK_URL 換成你的 Google Apps Script Web App 或 Firebase REST URL
+  // - Google Apps Script: GET 應回傳 JSON 陣列；POST body 為 { option: "牛肉麵" }
+  // - Firebase RTDB:      使用 https://<db>.firebaseio.com/lunch.json 形式
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyEyHFVDn1sPFhS_Tavzuhyjno7NnlVquENdFqKMt8h-dx_UMpsmG9ArD-7d0IBcxBA/exec";
+
   const DEFAULT_OPTIONS = [
     "牛肉麵",
     "便當",
@@ -37,7 +42,54 @@
     });
   }
 
-  function addOption() {
+  // 新增：把雲端回傳的資料正規化為字串陣列
+  // 支援格式：["牛肉麵", ...]、{ options: [...] }、{ "-Nx": "牛肉麵", ... }（Firebase push key）
+  function normalizeOptions(data) {
+    if (Array.isArray(data)) return data.filter((v) => typeof v === "string");
+    if (data && Array.isArray(data.options)) {
+      return data.options.filter((v) => typeof v === "string");
+    }
+    if (data && typeof data === "object") {
+      return Object.values(data)
+        .map((v) => (typeof v === "string" ? v : v && v.option))
+        .filter((v) => typeof v === "string");
+    }
+    return [];
+  }
+
+  // 新增：頁面載入時抓取雲端最新名單
+  async function fetchOptions() {
+    try {
+      const res = await fetch(WEBHOOK_URL, { method: "GET" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const remote = normalizeOptions(data);
+      if (remote.length > 0) {
+        options = [...new Set(remote)];
+        renderOptions();
+      }
+    } catch (err) {
+      console.warn("讀取雲端名單失敗，使用預設選項：", err);
+    }
+  }
+
+  // 新增：將新選項送至雲端
+  async function pushOption(value) {
+    try {
+      // 使用 text/plain 以避開 Google Apps Script 的 CORS preflight
+      const res = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ option: value }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    } catch (err) {
+      console.warn("上傳雲端失敗：", err);
+    }
+  }
+
+  // 修改：新增選項時同步上傳雲端
+  async function addOption() {
     const value = optionInput.value.trim();
     if (!value) return;
     if (options.includes(value)) {
@@ -48,6 +100,7 @@
     renderOptions();
     optionInput.value = "";
     optionInput.focus();
+    await pushOption(value);
   }
 
   function removeOption() {
@@ -145,5 +198,7 @@
   removeBtn.addEventListener("click", removeOption);
   spinBtn.addEventListener("click", spin);
 
+  // 修改：先渲染預設選項，再去雲端拉最新名單覆蓋
   renderOptions();
+  fetchOptions();
 })();
