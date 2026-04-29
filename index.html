@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>午餐拉霸機</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>🍱 午餐拉霸機</h1>
+
+    <section class="panel">
+      <div class="add-row">
+        <input
+          id="optionInput"
+          type="text"
+          placeholder="輸入午餐選項，例如：牛肉麵"
+          maxlength="20"
+          autocomplete="off"
+        />
+        <button id="addBtn" type="button">新增選項</button>
+      </div>
+
+      <div class="list-row">
+        <label for="optionSelect">目前選項：</label>
+        <select id="optionSelect" size="6"></select>
+        <button id="removeBtn" type="button">刪除選中</button>
+      </div>
+    </section>
+
+    <section class="slot">
+      <div class="slot-window">
+        <div id="slotStrip" class="slot-strip"></div>
+      </div>
+      <button id="spinBtn" type="button" class="spin-btn">🎰 抽午餐</button>
+      <div id="result" class="result"></div>
+    </section>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
