@@ -73,18 +73,18 @@
     }
   }
 
-  // 新增：將新選項送至雲端
-  async function pushOption(value) {
+  // 修改：以 action 區分新增/刪除，後端依此操作 Sheet
+  async function syncOption(action, value) {
     try {
       // 使用 text/plain 以避開 Google Apps Script 的 CORS preflight
       const res = await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ option: value }),
+        body: JSON.stringify({ action, option: value }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
     } catch (err) {
-      console.warn("上傳雲端失敗：", err);
+      console.warn(`雲端同步失敗 (${action})：`, err);
     }
   }
 
@@ -100,14 +100,16 @@
     renderOptions();
     optionInput.value = "";
     optionInput.focus();
-    await pushOption(value);
+    await syncOption("add", value);
   }
 
-  function removeOption() {
+  // 修改：刪除選項時同步通知雲端
+  async function removeOption() {
     const selected = optionList.value;
     if (!selected) return;
     options = options.filter((o) => o !== selected);
     renderOptions();
+    await syncOption("delete", selected);
   }
 
   function flashInput(message) {
